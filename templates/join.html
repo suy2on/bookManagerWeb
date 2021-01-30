@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>회원가입페이지</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript">
+
+        function check1() {
+            let id = $('.user_id').val();
+
+            $.ajax({
+                type: "POST",
+                url: "/check1",
+                data: {'give_id': id},
+                success: function (response) {
+                    if (response["result"] == "success") {
+                        alert(response['msg'])
+                    }
+                    if (response["result"] == "failure") {
+                        alert(response['msg']);
+                        window.location.reload();
+                    }
+                }
+            })
+        }
+
+        function submit_form() {
+            let user_id = $('.user_id').val()
+            let user_pw = $('.user_pw').val()
+            console.log(user_id, user_pw)
+
+            $.ajax({
+                type: "POST",
+                url: "/form_submit",
+                data: {
+                    'id_give': user_id,
+                    'pw_give': user_pw,
+                },
+                success: function (response) { // 서버에서 준 결과를 response라는 변수에 담음
+                    if (response['result'] == 'success') {
+                        alert(response['msg'])
+                        window.location.href = '/'
+                    } else {
+
+                    }
+                }
+            })
+        }
+
+
+    </script>
+</head>
+<body>
+<h1>회원가입페이지 입니다</h1>
+<p>
+<td>아이디</td>
+<td><input type="text" class="user_id"></td>
+
+<button onclick="check1()">아이디중복확인</button>
+</p>
+
+<p>
+<td>비밀번호</td>
+<td><input type="text" class="user_pw"/></td>
+</p>
+<p>
+<td>선호취향(중복선택가능)</td>
+<td>1 <input type="checkbox" name="1" value="computer"/></td>
+<td>2 <input type="checkbox" name="2" value="computer"/></td>
+<td>3 <input type="checkbox" name="3" value="computer"/></td>
+<td>4 <input type="checkbox" name="4" value="computer"/></td>
+</p>
+<p>
+<td>
+    <button onclick="submit_form()">회원가입완료</button>
+</td>
+</p>
+
+
+</body>
+</html>

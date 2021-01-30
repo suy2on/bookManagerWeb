@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Title</title>
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+          crossorigin="anonymous">
+    <!-- JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+
+
+    <script type="text/javascript">
+        function addbookbtn() {
+
+            if ($("#add-book-box").css("display") == "block") {
+                $("#add-book-box").hide();
+            } else {
+                $("#add-book-box").show();
+            }
+        }
+
+        function addbook() {
+            let title = $('#title').val();
+            let pub = $('#pub').val();
+
+            if (title == '' || pub == '') {
+                alert('제목과 출판사를 모두 입력하세요');
+            } else {
+                $.ajax({
+                    type: "POST",
+                    url: "/search",
+                    data: {
+                        'title_give': title,
+                        'pub_give': pub
+                    },
+                    success: function (response) { //
+                        if (response['result'] == 'success') {
+
+                            alert(response['msg'])
+                            location.reload()
+
+                        } else {
+                            alert(response['msg'])
+                        }
+                    }
+                })
+            }
+        }
+
+
+    </script>
+
+</head>
+
+
+<body>
+<div class="wrap">
+    <div class="jumbotron">
+        <h1 class="display-4">{{ user }}님의 서재</h1>
+        <p class="lead">나의 서재입니다!</p>
+        <hr class="my-4">
+        <p class="lead">
+            <button onclick="addbookbtn()">책 추가하기</button>
+        </p>
+    </div>
+    <div id="add-book-box" style="display:none">
+        <div>
+            <div class="form-group">
+                <p>
+                    <label>책 제목</label>
+                    <input id="title" placeholder="">
+                </p>
+                <p>
+                    <label>출판사</label>
+                    <input id="pub" placeholder="">
+                </p>
+            </div>
+            <button type="button" onclick="addbook()">책 추가완료</button>
+        </div>
+    </div>
+    <div id="cards-box" class="card-columns">
+        {% for record in records %}
+        <div class="card">
+            <button type="button" class="card-img-top" alt="Card image cap"><img src="{{ record.img_url }}">
+            </button>
+            <div class="card-body">
+                <a href="#" class="card-title">{{ record.title }}</a>
+                <p class="card-text">id : {{ record.id }}</p>
+                <p class="card-text comment"> 지은이 : {{ record.writer }}</p>
+
+                <form method="post" action="./update">
+                    <input type="hidden" value="{{ record.id }}" name="record_id">
+                    <input type="submit" value="클릭!">
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+
+</body>
+
+</html>
