@@ -188,6 +188,27 @@ def update():
         comments = record.comments
         return render_template('viewbook.html', record =record, comments = comments)
 
+## 책 삭제하기
+@app.route("/deletebook", methods=["POST"])
+def deletebook():
+    record_id = request.form.get(("record_id"))
+    record = Record.query.filter_by(id=record_id).first()
+    db.session.delete(record)
+    db.session.commit() # 책 카드 삭제
+
+    #comments = Comment.query.filter(Comment.book_id == record_id).all()
+    #for comment in comments:
+    #    print(comment)
+    #    db.session.delete(comment)
+    #    db.session.commit() # 그 책에 해당하는 comment 다 삭제
+
+    user = session.get('userid', None)
+    _user = User.query.filter(User.userid == user).first()
+    print(_user)
+    user_idnum = _user.id
+    records = Record.query.filter(Record.author_id == user_idnum).all()
+    return render_template('mylibrary.html', user=user, records=records)
+
 
 
 ## comment 작성하기
@@ -224,6 +245,18 @@ def update_content():
     record_id = session.get('record_id',None)
     comment = Comment.query.filter(Comment.id == commentid).first()
     comment.content = newcontent
+    db.session.commit()
+    record = Record.query.filter_by(id=record_id).first()
+    comments = record.comments
+    return render_template('viewbook.html', record=record, comments=comments)
+
+## comment delete 하기
+@app.route("/delete_comment", methods=["POST"])
+def delete_comment():
+    record_id = session.get('record_id', None)
+    commentid = request.form.get("commentid")
+    comment = Comment.query.filter(Comment.id == commentid).first()
+    db.session.delete(comment)
     db.session.commit()
     record = Record.query.filter_by(id=record_id).first()
     comments = record.comments

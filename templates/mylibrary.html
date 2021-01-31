@@ -104,6 +104,10 @@
                     <input type="hidden" value="{{ record.id }}" name="record_id">
                     <input type="submit" value="클릭!">
                 </form>
+                <form method="post" action="./deletebook">
+                    <input type="hidden" value="{{ record.id }}" name="record_id">
+                    <input type="submit" value="삭제!">
+                </form>
             </div>
         </div>
         {% endfor %}

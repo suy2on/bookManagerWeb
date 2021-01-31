@@ -223,6 +223,14 @@
                     </form>
                 </div>
 
+                <form method="POST" action="./delete_comment">
+                    <input type="hidden" value="{{comment}}" name="comment">
+                    <input type="hidden" value="{{comment.id}}" name="commentid">
+                    <input type="hidden" value="{{record}}" name="record">
+                    <input type="hidden" value="{{record.id}}" name="recordid">
+                    <input type="submit" value="Delete">
+                </form>
+
                 {% endfor %}
             </tr>
         </div>
@@ -250,7 +258,7 @@
                            value="{{record.summary}}" name="oldsummary">
                     <input type="text" cols="30" rows="5"
                            value="{{record.summary}}" name="newsummary"
-                           style="width:700px;height:600px;"></input>
+                           style="width:700px;height:600px">
                     <input type="submit" value="Update">
                 </form>
             </div>
