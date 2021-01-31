@@ -202,12 +202,7 @@ def deletebook():
     #    db.session.delete(comment)
     #    db.session.commit() # 그 책에 해당하는 comment 다 삭제
 
-    user = session.get('userid', None)
-    _user = User.query.filter(User.userid == user).first()
-    print(_user)
-    user_idnum = _user.id
-    records = Record.query.filter(Record.author_id == user_idnum).all()
-    return render_template('mylibrary.html', user=user, records=records)
+    return redirect('/mylibrary')
 
 
 
@@ -232,9 +227,9 @@ def update_page():
     comment = Comment.query.filter(Comment.id == commentid).first()
     comment.page = newpage
     db.session.commit()
-    record = Record.query.filter_by(id=record_id).first()
-    comments = record.comments
-    return render_template('viewbook.html', record=record, comments=comments)
+    #record = Record.query.filter_by(id=record_id).first()
+    #comments = record.comments
+    return redirect('/update')
 
 
 ## comment_content 수정
@@ -246,9 +241,9 @@ def update_content():
     comment = Comment.query.filter(Comment.id == commentid).first()
     comment.content = newcontent
     db.session.commit()
-    record = Record.query.filter_by(id=record_id).first()
-    comments = record.comments
-    return render_template('viewbook.html', record=record, comments=comments)
+    #record = Record.query.filter_by(id=record_id).first()
+    #comments = record.comments
+    return redirect('/update')
 
 ## comment delete 하기
 @app.route("/delete_comment", methods=["POST"])
@@ -258,9 +253,9 @@ def delete_comment():
     comment = Comment.query.filter(Comment.id == commentid).first()
     db.session.delete(comment)
     db.session.commit()
-    record = Record.query.filter_by(id=record_id).first()
-    comments = record.comments
-    return render_template('viewbook.html', record=record, comments=comments)
+    #record = Record.query.filter_by(id=record_id).first()
+    #comments = record.comments
+    return redirect('/update')
 
 
 ## summary 독후감
