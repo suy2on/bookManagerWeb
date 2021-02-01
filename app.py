@@ -199,14 +199,14 @@ def update():
 def deletebook():
     record_id = request.form.get(("record_id"))
     record = Record.query.filter_by(id=record_id).first()
+    comments = record.comments # 해당 record의 comments들 다 가져오기
+    for comment in comments:
+        print(comment)
+        db.session.delete(comment)
+        db.session.commit() # 그 책에 해당하는 comment 다 삭제
+
     db.session.delete(record)
     db.session.commit() # 책 카드 삭제
-
-    #comments = Comment.query.filter(Comment.book_id == record_id).all()
-    #for comment in comments:
-    #    print(comment)
-    #    db.session.delete(comment)
-    #    db.session.commit() # 그 책에 해당하는 comment 다 삭제
 
     return redirect('/mylibrary')
 
@@ -248,8 +248,8 @@ def update_content():
 ## comment delete 하기
 @app.route("/delete_comment", methods=["POST"])
 def delete_comment():
-    commentid = request.form.get("commentid")
-    comment = Comment.query.filter(Comment.id == commentid).first()
+    comment_id = request.form.get("commentid")
+    comment = Comment.query.filter(Comment.id == comment_id).first()
     db.session.delete(comment)
     db.session.commit()
     return redirect('/update')
