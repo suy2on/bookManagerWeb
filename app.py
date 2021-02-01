@@ -65,6 +65,12 @@ def addBook(book):
     writer = book['author']
     ISBN = book['isbn']
 
+    # <b> </b> 삭제
+    title = title.replace('<b>','')
+    title = title.replace('</b>','')
+    writer = writer.replace('<b>', '')
+    writer = writer.replace('</b>', '')
+
     record = Record(title=title, img_url=img, sub='', writer=writer, ISBN=ISBN, author=author)
     db.session.add(record)
     db.session.commit()
@@ -223,12 +229,9 @@ def makeComment():
 def update_page():
     newpage = request.form.get("newpage")
     commentid = request.form.get("commentid")
-    record_id = session.get('record_id',None)
     comment = Comment.query.filter(Comment.id == commentid).first()
     comment.page = newpage
     db.session.commit()
-    #record = Record.query.filter_by(id=record_id).first()
-    #comments = record.comments
     return redirect('/update')
 
 
@@ -237,24 +240,18 @@ def update_page():
 def update_content():
     newcontent = request.form.get("newcontent")
     commentid = request.form.get("commentid")
-    record_id = session.get('record_id',None)
     comment = Comment.query.filter(Comment.id == commentid).first()
     comment.content = newcontent
     db.session.commit()
-    #record = Record.query.filter_by(id=record_id).first()
-    #comments = record.comments
     return redirect('/update')
 
 ## comment delete 하기
 @app.route("/delete_comment", methods=["POST"])
 def delete_comment():
-    record_id = session.get('record_id', None)
     commentid = request.form.get("commentid")
     comment = Comment.query.filter(Comment.id == commentid).first()
     db.session.delete(comment)
     db.session.commit()
-    #record = Record.query.filter_by(id=record_id).first()
-    #comments = record.comments
     return redirect('/update')
 
 
@@ -262,14 +259,11 @@ def delete_comment():
 @app.route("/update_summary", methods=["POST"])
 def update_summary():
     newsummary = request.form.get("newsummary")
-    oldsummary = request.form.get("oldsummary")
-    comments = request.form.get("comments")
-    record = request.form.get("record")
-    recordid = request.form.get("recordid")
-    record = Record.query.filter_by(id=recordid).first()
+    record_id = session.get('record_id', None)
+    record = Record.query.filter_by(id=record_id).first()
     record.summary = newsummary
     db.session.commit()
-    return render_template('viewbook.html', record=record, comments=comments)
+    return redirect('/update')
 
 
 if __name__ == "__main__":

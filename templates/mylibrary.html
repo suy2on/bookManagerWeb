@@ -97,8 +97,8 @@
             </button>
             <div class="card-body">
                 <a href="#" class="card-title">{{ record.title }}</a>
-                <p class="card-text">id : {{ record.id }}</p>
-                <p class="card-text comment"> 지은이 : {{ record.writer }}</p>
+                <p class="card-text">번호 : {{ record.id }}</p>
+                <p class="card-text comment"> 저자 : {{ record.writer }}</p>
 
                 <form method="post" action="./update">
                     <input type="hidden" value="{{ record.id }}" name="record_id">
