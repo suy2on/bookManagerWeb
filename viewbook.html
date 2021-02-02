@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Title</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+          crossorigin="anonymous">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+
+
+    <style>
+        .main_title {
+            text-align: center;
+        }
+
+        .buttons {
+            text-align: center;
+        }
+
+        h1,
+        h5 {
+            display: inline;
+        }
+
+        .info {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .review {
+            text-align: center;
+        }
+
+        .reviews {
+            margin-top: 100px;
+        }
+    </style>
+
+    <script type="text/javascript">
+
+         $(document).ready(function () {
+            console.log('open')
+        });
+
+        function addbookbtn() {
+
+            if ($("#add-book-box").css("display") == "block") {
+                $("#add-book-box").hide();
+            } else {
+                $("#add-book-box").show();
+            }
+        }
+
+        function addbook() {
+            let title = $('#title').val();
+            let pub = $('#pub').val();
+
+            if (title == '' || pub == '') {
+                alert('제목과 출판사를 모두 입력하세요');
+            } else {
+                $.ajax({
+                    type: "POST",
+                    url: "/search",
+                    data: {
+                        'title_give': title,
+                        'pub_give': pub
+                    },
+                    success: function (response) { //
+                        if (response['result'] == 'success') {
+
+                            alert(response['msg'])
+                            location.reload()
+
+                        } else {
+                            alert(response['msg'])
+                        }
+                    }
+                })
+            }
+        }
+
+
+        function validateLength(obj) {
+            let content = $(obj).val();
+            if (content.length > 140) {
+                alert("리뷰는 140자까지 기록할 수 있습니다.");
+                $(obj).val(content.substring(0, content.length - 1));
+            }
+        }
+
+        function comment() {
+            if ($("#comment-boxs").css("display") == "block") {
+                $("#comment-boxs").hide();
+            } else {
+                $("#comment-boxs").show();
+            }
+        }
+
+        function summary() {
+            if ($("#summary-boxs").css("display") == "block") {
+                $("#summary-boxs").hide();
+            } else {
+                $("#summary-boxs").show();
+            }
+        }
+
+
+        function makeComment() {
+            let page = $("#title").val();
+            let comment = $("#bookReview").val();
+            $.ajax({
+                type: "POST",
+                url: "/makeComment",
+                data: {'page_give': page, 'comment_give': comment},
+                success: function (response) {
+                    if (response["result"] == "success") {
+                        alert('작성이 완료되었습니다!');
+                        window.location.reload();
+                    }
+                    if (response["result"] == "failure") {
+                    }
+                }
+            })
+
+
+        }
+
+
+    </script>
+
+</head>
+<body>
+<h1 class="main_title">책 정보를 저장하고 기록하는 코너입니다!</h1> <br><br>
+
+<div class="card">
+    <button type="button" class="card-img-top" alt="Card image cap"><img src="{{record.img_url}}"></button>
+    <div class="card-body">
+        <p href="#" class="card-title" style="text-align:center;">{{record.title}}</p>
+        <p class="card-text" style="text-align:center;">번호 : {{record.id}}</p>
+        <p class="card-text comment" style="text-align:center;">저자 : {{record.writer}}</p>
+    </div>
+</div>
+
+<br>
+<br>
+
+<div class="buttons">
+    <button type="button" onclick="comment()" class="btn btn-primary btn-lg">순간순간 comment</button>
+    <button type="button" onclick="summary()" class="btn btn-secondary btn-lg">내 독서록</button>
+</div>
+
+<div id="comment-boxs" style="display:none">
+    <div class="container">
+        <img src="" class="img-fluid" alt="">
+        <div class="info">
+            <h5>순간순간 comment!</h5>
+            <p></p>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">페이지</span>
+                </div>
+                <input type="text" class="form-control" id="title">
+            </div>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">나의 comment</span>
+                </div>
+                <textarea class="form-control" id="bookReview"
+                          cols="30"
+                          rows="5" placeholder="140자까지 입력할 수 있습니다." onkeyup="validateLength(this)"></textarea>
+            </div>
+            <div class="review">
+                <button onclick="makeComment()" type="button" class="btn btn-primary">comment 작성하기</button>
+            </div>
+        </div>
+        <div class="reviews">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">페이지</th>
+                    <th scope="col">나의 comment</th>
+                </tr>
+                </thead>
+                <tbody id="reviews-box">
+                </tbody>
+            </table>
+            <tr>
+                {% for comment in comments %}
+                <div style="float: left; width: 50%;">
+                    <form method="POST" action="./update_page">
+                        <input type="hidden" value="{{comment}}" name="comment">
+                        <input type="hidden" value="{{comment.id}}" name="commentid">
+                        <input type="hidden" value="{{record}}" name="record">
+                        <input type="hidden" value="{{record.id}}" name="recordid">
+                        <input type="hidden" value="{{comment.page}}" name="oldpage">
+                        <input type="text" value="{{comment.page}}" name="newpage">
+                        <input type="submit" value="Update">
+                    </form>
+                </div>
+
+                <div style="float: left; width: 50%;">
+                    <form method="POST" action="./update_content">
+                        <input type="hidden" value="{{comment}}" name="comment">
+                        <input type="hidden" value="{{comment.id}}" name="commentid">
+                        <input type="hidden" value="{{record}}" name="record">
+                        <input type="hidden" value="{{record.id}}" name="recordid">
+                        <input type="hidden" value="{{comment.content}}" name="oldcontent">
+                        <input type="text" value="{{comment.content}}" name="newcontent" style="width: 400px;">
+                        <input type="submit" value="Update">
+                    </form>
+                </div>
+
+                <form method="POST" action="./delete_comment">
+                    <input type="hidden" value="{{comment}}" name="comment">
+                    <input type="hidden" value="{{comment.id}}" name="commentid">
+                    <input type="hidden" value="{{record}}" name="record">
+                    <input type="hidden" value="{{record.id}}" name="recordid">
+                    <input type="submit" value="Delete">
+                </form>
+
+                {% endfor %}
+            </tr>
+        </div>
+    </div>
+</div>
+
+
+<div id="summary-boxs" style="display:none">
+    <div class="container">
+        <img src="" class="img-fluid" alt="">
+        <div class="info">
+            <h5>내 독서록!</h5>
+            <p></p>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">나의 독서록</span>
+                </div>
+
+                <form method="POST" action="./update_summary">
+                    <input type="hidden" value="{{record}}" name="record">
+                    <input type="hidden" value="{{record.id}}" name="recordid">
+                    <input type="hidden" value="{{comments}}" name="comments">
+
+                    <input type="hidden" cols="30" rows="5"
+                           value="{{record.summary}}" name="oldsummary">
+                    <input type="text" cols="30" rows="5"
+                           value="{{record.summary}}" name="newsummary"
+                           style="width:700px;height:600px">
+                    <input type="submit" value="Update">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

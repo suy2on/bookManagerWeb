@@ -143,6 +143,7 @@ def join():
 @app.route("/home")
 def home():
     user = session.get('userid', None)
+    events = Calendar.query.filter(Calendar.user_id == user).all()
     return render_template('home.html', user=user, events = events)
 
 
@@ -296,6 +297,19 @@ def update_summary():
     record.summary = newsummary
     db.session.commit()
     return redirect('/update')
+
+## calendar
+@app.route("/calendar", methods=["POST"])
+def calendar():
+    user = session.get('userid', None)
+    book_receive = request.form.get("book_give")
+    date_receive = request.form.get("date_give")
+    time_receive = request.form.get("time_give")
+    calendar = Calendar(book=book_receive, date=date_receive, time=time_receive, user_id=user)
+    db.session.add(calendar)
+    db.session.commit()
+    return jsonify({'result': 'success'})
+
 
 
 if __name__ == "__main__":
