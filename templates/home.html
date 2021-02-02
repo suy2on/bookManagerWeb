@@ -1,10 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset='utf-8'/>
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.5.1/main.min.css' rel='stylesheet'/>
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.5.1/main.min.js'></script>
     <title>메인화면</title>
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script type="text/javascript">
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {});
+            calendar.render();
+        });
+
         function mylibrary() {
             window.location.href = '/mylibrary'
         }
@@ -14,10 +24,11 @@
 <div class="profile">
     <h2>{{user}}님의 블로그</h2>
 </div>
+
+<div id="calendar"></div>
 <div class="button">
     <button onclick="mylibrary()">내 서재</button>
     <button>둘러보기</button>
-    <button>목표달성하기</button>
 </div>
 </body>
 </html>

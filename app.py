@@ -22,14 +22,17 @@ db = SQLAlchemy(app)
 ### 모델시작 ####
 class User(db.Model):
     __table_name__ = 'user'
+
     id = db.Column(db.Integer, primary_key=True)
     userid = db.Column(db.String(20), nullable=False)
     userpw = db.Column(db.String(30), nullable=False)
     records = db.relationship('Record', backref='author')
+    calendar =db.relationship('Calendar', backref='calendar')
 
 
 class Record(db.Model):
     __table_name__ = 'record'
+
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(50), nullable=False)
     ISBN = db.Column(db.String(30), nullable=False)
@@ -47,6 +50,15 @@ class Comment(db.Model):
     page = db.Column(db.String(20), nullable=False)
     content = db.Column(db.String(140), nullable=False)
     book_id = db.Column(db.String(10), db.ForeignKey('record.id'))
+
+class Calendar(db.Model):
+    __table_name__ = 'calendar'
+
+    id = db.Column(db.Integer, primary_key=True)
+    book = db.Column(db.String(50), nullable=False)
+    date = db.Column(db.String(50), nullable=False)
+    time = db.Column(db.String(20), nullable=False)
+    user_id = db.Column(db.String(20), db.ForeignKey('user.id'))
 
 db.create_all()
 
