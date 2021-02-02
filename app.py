@@ -124,20 +124,6 @@ def join():
         return jsonify({'msg': '회원가입 성공'})
 
 
-# events = [
-#     {
-#         'book': 'event1',
-#         'date': '2021-02-01',
-#         'time': '20분'
-#
-#     },
-#     {
-#         'book': 'event3',
-#         'date': '2021-02-01',
-#         'time': '20분'
-#     },
-# ]
-
 
 # 홈화면
 @app.route("/home")
@@ -308,7 +294,7 @@ def calendar():
     calendar = Calendar(book=book_receive, date=date_receive, time=time_receive, user_id=user)
     db.session.add(calendar)
     db.session.commit()
-    return jsonify({'result': 'success'})
+    return jsonify({'result': 'success' , 'msg': '추가완료'})
 
 
 

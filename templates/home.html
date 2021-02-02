@@ -15,7 +15,7 @@
                 events: [
                 {% for event in events %}
                 {
-                    title : '{{event.book}}'+' {{event.time}}',
+                    title : '{{event.book}}'+' {{event.time}}'+'분',
                     start : '{{event.date}}'
                 },
                 {% endfor %}
