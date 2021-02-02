@@ -10,7 +10,6 @@ import ssl
 client_id = "slXTgcZ7T9bocjBAKSFq"
 client_secret = "n4tbFhbriV"
 
-
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'secretkey'
@@ -18,6 +17,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bookManager.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+
 
 ### 모델시작 ####
 class User(db.Model):
@@ -27,7 +27,7 @@ class User(db.Model):
     userid = db.Column(db.String(20), nullable=False)
     userpw = db.Column(db.String(30), nullable=False)
     records = db.relationship('Record', backref='author')
-    calendar =db.relationship('Calendar', backref='calendar')
+    calendar = db.relationship('Calendar', backref='calendar')
 
 
 class Record(db.Model):
@@ -51,6 +51,7 @@ class Comment(db.Model):
     content = db.Column(db.String(140), nullable=False)
     book_id = db.Column(db.String(10), db.ForeignKey('record.id'))
 
+
 class Calendar(db.Model):
     __table_name__ = 'calendar'
 
@@ -60,11 +61,11 @@ class Calendar(db.Model):
     time = db.Column(db.String(20), nullable=False)
     user_id = db.Column(db.String(20), db.ForeignKey('user.id'))
 
+
 db.create_all()
 
+
 ### 모델끝 ###
-
-
 
 
 ## 책추함수
@@ -78,14 +79,15 @@ def addBook(book):
     ISBN = book['isbn']
 
     # <b> </b> 삭제
-    title = title.replace('<b>','')
-    title = title.replace('</b>','')
+    title = title.replace('<b>', '')
+    title = title.replace('</b>', '')
     writer = writer.replace('<b>', '')
     writer = writer.replace('</b>', '')
 
     record = Record(title=title, img_url=img, sub='', writer=writer, ISBN=ISBN, author=author)
     db.session.add(record)
     db.session.commit()
+
 
 ## 로그인
 @app.route("/", methods=['GET', 'POST'])
@@ -106,6 +108,7 @@ def login():
         else:
             return jsonify({'result': 'fail', 'msg': '아이디와 비밀번호가 일치하지않습니다'})
 
+
 ## 회원가입
 @app.route("/join", methods=['GET', 'POST'])
 def join():
@@ -120,12 +123,27 @@ def join():
         db.session.commit()
         return jsonify({'msg': '회원가입 성공'})
 
+ 
+# events = [
+#     {
+#         'book': 'event1',
+#         'date': '2021-02-01',
+#         'time': '20분'
+#
+#     },
+#     {
+#         'book': 'event3',
+#         'date': '2021-02-01',
+#         'time': '20분'
+#     },
+# ]
+
 
 # 홈화면
 @app.route("/home")
 def home():
     user = session.get('userid', None)
-    return render_template('home.html', user=user)
+    return render_template('home.html', user=user, events = events)
 
 
 # 아이디 중복확인
@@ -164,6 +182,7 @@ def mylibrary():
         records = Record.query.filter(Record.author_id == user_idnum).all()
         return render_template('mylibrary.html', user=user, records=records)
 
+
 ## 읽은 책추가
 @app.route("/search", methods=['POST'])
 def searchBook():
@@ -182,7 +201,7 @@ def searchBook():
     if (rescode == 200):
         response_body = response.read().decode('utf-8')
         result = json.loads(response_body)
-        addBook(result['items'][0]) ##addBook함수실행
+        addBook(result['items'][0])  ##addBook함수실행
         return jsonify({'result': 'success', 'msg': '책추가완료'})
     # 못찾으면
     else:
@@ -193,35 +212,35 @@ def searchBook():
 ## viewbook
 @app.route("/update", methods=["POST", "GET"])
 def update():
-    if request.method=='POST':
+    if request.method == 'POST':
         record_id = request.form.get(("record_id"))
         record = Record.query.filter_by(id=record_id).first()
-        session['record_id'] = record.id ## 여기서 record_id를 session에 저
-        #print(type(record))
+        session['record_id'] = record.id  ## 여기서 record_id를 session에 저
+        # print(type(record))
         comments = record.comments
         return render_template('viewbook.html', record=record, comments=comments)
     else:
         record_id = session.get('record_id', None)
         record = Record.query.filter_by(id=record_id).first()
         comments = record.comments
-        return render_template('viewbook.html', record =record, comments = comments)
+        return render_template('viewbook.html', record=record, comments=comments)
+
 
 ## 책 삭제하기
 @app.route("/deletebook", methods=["POST"])
 def deletebook():
     record_id = request.form.get(("record_id"))
     record = Record.query.filter_by(id=record_id).first()
-    comments = record.comments # 해당 record의 comments들 다 가져오기
+    comments = record.comments  # 해당 record의 comments들 다 가져오기
     for comment in comments:
         print(comment)
         db.session.delete(comment)
-        db.session.commit() # 그 책에 해당하는 comment 다 삭제
+        db.session.commit()  # 그 책에 해당하는 comment 다 삭제
 
     db.session.delete(record)
-    db.session.commit() # 책 카드 삭제
+    db.session.commit()  # 책 카드 삭제
 
     return redirect('/mylibrary')
-
 
 
 ## comment 작성하기
@@ -229,7 +248,7 @@ def deletebook():
 def makeComment():
     page_receive = request.form.get("page_give")
     comment_receive = request.form.get("comment_give")
-    record_id = session.get('record_id',None)
+    record_id = session.get('record_id', None)
     comment = Comment(page=page_receive, content=comment_receive, book_id=record_id)
     db.session.add(comment)
     db.session.commit()
@@ -256,6 +275,7 @@ def update_content():
     comment.content = newcontent
     db.session.commit()
     return redirect('/update')
+
 
 ## comment delete 하기
 @app.route("/delete_comment", methods=["POST"])

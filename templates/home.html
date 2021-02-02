@@ -11,10 +11,49 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             var calendarEl = document.getElementById('calendar');
-            var calendar = new FullCalendar.Calendar(calendarEl, {});
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                events: [
+                {% for event in events %}
+                {
+                    title : '{{event.book}}'+' {{event.time}}',
+                    start : '{{event.date}}'
+                },
+                {% endfor %}
+            ]
+            });
             calendar.render();
         });
 
+        function addevent(){
+            let book = $('.book').val();
+            let date = $('.date').val();
+            let time = $('.time').val();
+
+            if(book === '' || date === '' || time === '') {
+                alert('모두 입력해주세요');
+            }else {
+                $.ajax({
+                    type: "POST",
+                    url: "/calendar",
+                    data: {
+                        'book_give': book,
+                        'date_give': date,
+                        'time_give': time,
+                    },
+                    success: function (response) { //
+                        if (response['result'] == 'success') {
+
+                            alert(response['msg'])
+                            location.reload()
+
+                        } else {
+                            alert(response['msg'])
+                        }
+                    }
+                })
+            }
+
+        }
         function mylibrary() {
             window.location.href = '/mylibrary'
         }
@@ -26,6 +65,13 @@
 </div>
 
 <div id="calendar"></div>
+<div class="input_time">
+    <h3>오늘의 기록</h3>
+    <p>책 이름 : <input class="book" type="text"></p>
+    <p>날짜 : <input class="date" type="date"></p>
+    <p>독서시간 : <input class="time" type="text"> 분</p>
+    <button onclick="addevent()">기록하기</button>
+</div>
 <div class="button">
     <button onclick="mylibrary()">내 서재</button>
     <button>둘러보기</button>
