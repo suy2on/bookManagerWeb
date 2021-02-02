@@ -123,7 +123,7 @@ def join():
         db.session.commit()
         return jsonify({'msg': '회원가입 성공'})
 
- 
+
 # events = [
 #     {
 #         'book': 'event1',
