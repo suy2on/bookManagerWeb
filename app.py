@@ -123,14 +123,16 @@ def join():
         db.session.commit()
         return jsonify({'msg': '회원가입 성공'})
 
-
+# 이거 문자열로 보내는데 받을 때 숫자로 받아 03/02 로 보내면 저거 나눠서 1.5로 표시되더라 이거 좀 형변환을 만져주거나 저렇게 나처럼 3.4이렇게 날짜 표시해야할듯
+times = ['35', '55', '44', '22', '0', '22', '30']
+dates = ['3.1', '3.2', '3.3', '3.4', '3.5', '3.6', '3.7']
 
 # 홈화면
 @app.route("/home")
 def home():
     user = session.get('userid', None)
     events = Calendar.query.filter(Calendar.user_id == user).all()
-    return render_template('home.html', user=user, events = events)
+    return render_template('home.html', user=user, events = events, dates = dates, times = times)
 
 
 # 아이디 중복확인
