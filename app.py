@@ -5,6 +5,7 @@ import urllib.request
 from urllib.parse import urlencode, quote
 import json
 import ssl
+import datetime
 
 # 네이버 api사용을 위한 정보
 client_id = "slXTgcZ7T9bocjBAKSFq"
@@ -123,15 +124,42 @@ def join():
         db.session.commit()
         return jsonify({'msg': '회원가입 성공'})
 
-# 이거 문자열로 보내는데 받을 때 숫자로 받아 03/02 로 보내면 저거 나눠서 1.5로 표시되더라 이거 좀 형변환을 만져주거나 저렇게 나처럼 3.4이렇게 날짜 표시해야할듯
-times = ['35', '55', '44', '22', '0', '22', '30']
-dates = ['3.1', '3.2', '3.3', '3.4', '3.5', '3.6', '3.7']
+
 
 # 홈화면
 @app.route("/home")
 def home():
     user = session.get('userid', None)
     events = Calendar.query.filter(Calendar.user_id == user).all()
+    # 이거 문자열로 보내는데 받을 때 숫자로 받아 03/02 로 보내면 저거 나눠서 1.5로 표시되더라 이거 좀 형변환을 만져주거나 저렇게 나처럼 3.4이렇게 날짜 표시해야할듯
+    times = ['35', '55', '44', '22', '0', '22', '30']
+    dates = ['3.10', '3.2', '3.0', '3.4', '3.5', '3.6', '3.7']
+
+    today = datetime.date.today()
+    for i in range(7):
+        today += datetime.timedelta(-1)
+        today.strftime('%Y-%m-%d')
+        date = str(today)  ## date 의 type 은 str
+        dates[6 - i] = date[5:7] + '.' + date[8:]
+        dates[6-i] = float(dates[6-i])
+        dates[6-i] = format(dates[6-i], ".2f") #이거 30일 처럼 끝이 0인게 그래프에서 0이 출력이 안되어서
+        # 내가 format으로 소수점 형식 지정했는데 서버에선 제대로 출력되도 저 망할 그래프가 인식을 안해줌
+        # 저 그래프 자체가 뒤에있는 0을 없애버림ㅋㅋㅋㅋ흐앙
+
+        #DB에서 date에 해당하는 time 가져오기 >> userid 와 date 의 값 두개가 모두 필요
+        _times = Calendar.query.filter(Calendar.user_id == user).filter(Calendar.date == date).all()
+        len_time = len(_times)
+        if len_time==0: #시간 기록이 없으면 > 0분 기록
+            times[6-i]=0
+        elif len_time==1:
+            times[6-i]=_times[0].time
+        else: # 읽은 책의 개수가 여러권일때 > 시간 모두 더하기
+            n=0
+            for k in range(len_time):
+                n = n + int(_times[k].time)
+            times[6-i]=n
+    print('dates: ', dates)
+    print('times: ', times) # dates랑 times 모두 잘 가져오는거 확인완료
     return render_template('home.html', user=user, events = events, dates = dates, times = times)
 
 
