@@ -6,6 +6,7 @@ from urllib.parse import urlencode, quote
 import json
 import ssl
 import datetime
+import requests
 
 # 네이버 api사용을 위한 정보
 client_id = "slXTgcZ7T9bocjBAKSFq"
@@ -18,6 +19,68 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bookManager.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+
+## 베스트셀러 장르별 url
+novel = "https://book.naver.com/bestsell/home_bestseller_json.nhn?cp_cate=001001044&cp_name=yes24"
+essay = "https://book.naver.com/bestsell/home_bestseller_json.nhn?cp_cate=001001045&cp_name=yes24"
+business = "https://book.naver.com/bestsell/home_bestseller_json.nhn?cp_cate=001001025&cp_name=yes24"
+self = "https://book.naver.com/bestsell/home_bestseller_json.nhn?cp_cate=001001026&cp_name=yes24"
+children = "https://book.naver.com/bestsell/home_bestseller_json.nhn?cp_cate=001001016&cp_name=yes24"
+kids = "https://book.naver.com/bestsell/home_bestseller_json.nhn?cp_cate=001001027&cp_name=yes24"
+humanities = "https://book.naver.com/bestsell/home_bestseller_json.nhn?cp_cate=001001019&cp_name=yes24"
+life = "https://book.naver.com/bestsell/home_bestseller_json.nhn?cp_cate=001001001&cp_name=yes24"
+language = "https://book.naver.com/bestsell/home_bestseller_json.nhn?cp_cate=001001049&cp_name=yes24"
+history = "https://book.naver.com/bestsell/home_bestseller_json.nhn?cp_cate=001001010&cp_name=yes24"
+
+## 베스트셀러 크롤링 함수
+def weekBest(url):
+    title={1:' ', 2:' ', 3:' ', 4:' ', 5:' ', 6:' ', 7:' ', 8:' ', 9:' ', 10:' '}
+    author={1:' ', 2:' ', 3:' ', 4:' ', 5:' ', 6:' ', 7:' ', 8:' ', 9:' ', 10:' '}
+    img_url={1:' ', 2:' ', 3:' ', 4:' ', 5:' ', 6:' ', 7:' ', 8:' ', 9:' ', 10:' '}
+    link={1:' ', 2:' ', 3:' ', 4:' ', 5:' ', 6:' ', 7:' ', 8:' ', 9:' ', 10:' '}
+    i=1
+    custom_header = {
+        'referer' : "https://book.naver.com/",
+        'user-agent' : "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_2_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.146 Safari/537.36"
+    }
+
+    req = requests.get(url, headers = custom_header)
+
+    if req.status_code == requests.codes.ok:
+        print("접속 성공")
+        book_data = json.loads(req.text)
+        for book in book_data['result']:
+            book['title']= book['title'].replace('&#40', "(")
+            book['title'] = book['title'].replace('&#41', ")")
+            title[i]=book['title']
+            author[i]=book['authorList'][0]['name']
+
+            title2 = urllib.parse.quote(title[i])
+            author2 = urllib.parse.quote(author[i])
+            url = "https://openapi.naver.com/v1/search/book_adv.json?d_titl=" + title2 + "&d_auth=" + author2  # json 결과
+            request2 = urllib.request.Request(url)
+            request2.add_header("X-Naver-Client-Id", client_id)
+            request2.add_header("X-Naver-Client-Secret", client_secret)
+            context = ssl._create_unverified_context()
+            response = urllib.request.urlopen(request2, context=context)
+            rescode = response.getcode()
+            # 찾으면
+            if (rescode == 200):
+                response_body = response.read().decode('utf-8')
+                result = json.loads(response_body)
+                book = result['items'][0]
+                imgurl = book['image']
+                urllink = book['link']
+                img_url[i]=imgurl
+                link[i]=urllink
+            # 못찾으면
+            else:
+                img_url[i]=' '
+                link[i]=' '
+
+
+            i = i+1
+    return title, author, img_url, link
 
 
 ### 모델시작 ####
@@ -325,6 +388,29 @@ def calendar():
     db.session.add(calendar)
     db.session.commit()
     return jsonify({'result': 'success' , 'msg': '추가완료'})
+
+# 둘러보기 페이지
+@app.route("/looking", methods=["GET"])
+def looking():
+    userid = session.get('userid', None)
+    user = User.query.filter(User.userid == userid).first()
+    print('user id: ', userid, 'user: ', user)
+    return render_template('looking.html', user=user)
+
+# 베스트셀러 _ 클릭하면 장르별 책 나열하기
+@app.route("/genre", methods=["POST"])
+def bestseller_genre():
+    genre_receive = request.form.get("genre")
+
+    global novel; global essay; global business; global self; global children;
+    global kids; global humanities; global life; global language; global history;
+
+    genre_dict = {'novel': novel, 'essay': essay, 'business': business, 'self': self, 'children': children,
+                  'kids': kids, 'humanities': humanities, 'life': life, 'language': language, 'history': history}
+
+    url = genre_dict[request.form.get("genre")]
+    title, author, img_url, link = weekBest(url) # 책제목 딕셔너리 반환
+    return jsonify({'result': 'success', 'title': title, 'author': author, 'img_url': img_url, 'link': link})
 
 
 
