@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+          crossorigin="anonymous">
+    <!-- JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+
+        function option(clicked_genre) {
+            $('#cards').empty();
+            let genre = clicked_genre;
+
+                    $.ajax({
+                    type: "POST",
+                    url: "/genre",
+                    data: {
+                        'genre': genre
+                    },
+                    success: function (response) { //
+                        if (response['result'] == 'success') {
+                            let titles = response['title'];
+                            let authors = response['author'];
+                            let img_urls = response['img_url'];
+                            let links = response['link'];
+
+                            for(let i=1; i<11; i++) {
+                              let title = titles[i];
+                              let author = authors[i];
+                              let img_url = img_urls[i];
+                              let link = links[i];
+
+                              let temp_html = `<div class="card">
+                                               <a href="${link}"><img class="card-img-top" src="${img_url}" alt=""></a>
+                                               <div class="card-body">
+                                               <p class="card-text"><small class="text-muted">${i}위</small></p>
+                                               <h5 class="card-title">${title}</h5>
+                                               <p class="card-text"><small class="text-muted">${author}</small></p>
+                                               </div>
+                                               </div>`
+                              $('#cards').append(temp_html);
+                            }
+
+                        } else {}
+                    }
+                    })
+        }
+
+    </script>
+
+    <title>Title</title>
+
+
+</head>
+
+<body>
+<h1>{{ user.userid }} 님의 둘러보기</h1>
+<nav class="navbar navbar-light bg-light justify-content-between">
+  <a class="navbar-brand">책 검색하기</a>
+  <form class="form-inline">
+    <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+  </form>
+</nav>
+
+<h1>BEST SELLER</h1>
+<button class="btn btn-outline-primary" id="novel" type="button" onclick="option(this.id)">novel</button>
+<button class="btn btn-outline-secondary" id="essay" type="button" onclick="option(this.id)">essay</button>
+<button class="btn btn-outline-success" id="business" type="button" onclick="option(this.id)">business</button>
+<button class="btn btn-outline-danger" id="self" type="button" onclick="option(this.id)">self</button>
+<button class="btn btn-outline-warning" id="children" type="button" onclick="option(this.id)">children</button>
+<button class="btn btn-outline-info" id="kids" type="button" onclick="option(this.id)">kids</button>
+<button class="btn btn-outline-light" id="humanities" type="button" onclick="option(this.id)">humanities</button>
+<button class="btn btn-outline-dark" id="life" type="button" onclick="option(this.id)">life</button>
+<button class="btn btn-outline-primary" id="language" type="button" onclick="option(this.id)">language</button>
+<button class="btn btn-outline-secondary" id="history" type="button" onclick="option(this.id)">history</button>
+
+
+<div class="card-group" id="cards">
+</div>
+
+<h1>{{user.userid }}님 취향의 책 추천</h1>
+</body>
+</html>
