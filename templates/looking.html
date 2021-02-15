@@ -21,6 +21,27 @@
             crossorigin="anonymous"></script>
 
     <script type="text/javascript">
+        function heart(isbn, title, author, img_url) {
+
+             $.ajax({
+             type: "POST",
+             url: "/heart",
+             data: {
+                'userid': {{user.id}},
+                'isbn': isbn,
+                'title': title,
+                'author': author,
+                'img_url': img_url,
+             },
+             success: function(response) {
+                if(response['result'] == 'success') {
+                   alert("좋아요 완료");
+                   location.reload();
+                }
+                else {}
+             }
+             })
+        }
 
         function option(clicked_genre) {
             $('#cards').empty();
@@ -38,32 +59,46 @@
                             let authors = response['author'];
                             let img_urls = response['img_url'];
                             let links = response['link'];
+                            let isbns = response['isbn'];
+                            let arr = [];
+                            {% for isbn in isbnlist %}
+                             arr.push('{{isbn}}');
+                            {% endfor %}
+                            console.log(arr);
 
                             for(let i=1; i<11; i++) {
                               let title = titles[i];
                               let author = authors[i];
                               let img_url = img_urls[i];
                               let link = links[i];
+                              let isbn = isbns[i];
+                              let like;
 
-                              let like = "far fa-heart";
+                              if(arr.includes(isbn)) {
+                                  like = "fas fa-heart";
+                              } else {
+                                  like = "far fa-heart";
+                              }
 
                               let temp_html = `<div class="card">
                                                <a href="${link}" target="_blank"><img class="card-img-top" src="${img_url}" alt=""></a>
                                                <div class="card-body">
-                                               <i class="${like}"></i>
+                                               <i class="${like}" onclick="heart('${isbn}', '${title}', '${author}', '${img_url}')"></i>
                                                <p class="card-text"><small class="text-muted">${i}위</small></p>
                                                <h5 class="card-title">${title}</h5>
                                                <p class="card-text"><small class="text-muted">${author}</small></p>
                                                </div>
                                                </div>`
-                              $('#cards').append(temp_html);
+                                $('#cards').append(temp_html);
+
+
+
                             }
 
                         } else {}
                     }
                     })
         }
-
     </script>
 
     <title>Title</title>
@@ -73,6 +108,7 @@
 
 <body>
 <h1>{{ user.userid }} 님의 둘러보기</h1>
+<h1> {{ isbns }}</h1>
 <nav class="navbar navbar-light bg-light justify-content-between">
   <a class="navbar-brand">책 검색하기</a>
   <form class="form-inline">

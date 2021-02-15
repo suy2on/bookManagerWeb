@@ -333,18 +333,15 @@ def calendar():
 def looking():
     userid = session.get('userid', None)
     user = User.query.filter(User.userid == userid).first()
-    print('user id: ', userid, 'user: ', user)
 
-    userid = user.id
-    print(userid)
-    likelists = Wishlist.query.filter(Wishlist.user_id == userid).all()
+    likelists = user.wishlist # user의 wish객체들의 리스트 반
     isbns=[]
-    i=0
+
     for likelist in likelists:
         isbns.append(likelist.ISBN)
-        i = i+1
+
     print(isbns) # isbns 는 사용user가 좋아요 누른 모든 책들의 isbn 목록들
-    return render_template('looking.html', user=user, isbns=isbns)
+    return render_template('looking.html', user=user, isbnlist=isbns)
 
 # 베스트셀러 _ 클릭하면 장르별 책 나열하기
 @app.route("/genre", methods=["POST"])
