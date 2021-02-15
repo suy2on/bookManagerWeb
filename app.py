@@ -334,9 +334,9 @@ def bestseller_genre():
     genre_dict = {'novel': novel, 'essay': essay, 'business': business, 'self': self, 'children': children,
                   'kids': kids, 'humanities': humanities, 'life': life, 'language': language, 'history': history}
 
-    url = genre_dict[request.form.get("genre")]
-    title, author, img_url, link = weekBest(url) # 책제목 딕셔너리 반환
-    return jsonify({'result': 'success', 'title': title, 'author': author, 'img_url': img_url, 'link': link})
+    url = genre_dict[genre_receive]
+    title, author, img_url, link, isbn = weekBest(url) # 책제목 딕셔너리 반환
+    return jsonify({'result': 'success', 'title': title, 'author': author, 'img_url': img_url, 'link': link, 'isbn': isbn})
 
 
 

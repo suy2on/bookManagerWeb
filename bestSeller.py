@@ -19,10 +19,12 @@ history = "https://book.naver.com/bestsell/home_bestseller_json.nhn?cp_cate=0010
 
 ## 베스트셀러 크롤링 함수
 def weekBest(url):
-    title={1:' ', 2:' ', 3:' ', 4:' ', 5:' ', 6:' ', 7:' ', 8:' ', 9:' ', 10:' '}
-    author={1:' ', 2:' ', 3:' ', 4:' ', 5:' ', 6:' ', 7:' ', 8:' ', 9:' ', 10:' '}
-    img_url={1:' ', 2:' ', 3:' ', 4:' ', 5:' ', 6:' ', 7:' ', 8:' ', 9:' ', 10:' '}
-    link={1:' ', 2:' ', 3:' ', 4:' ', 5:' ', 6:' ', 7:' ', 8:' ', 9:' ', 10:' '}
+    title={}
+    author={}
+    img_url={}
+    link={}
+    isbns={}
+
     i=1
     custom_header = {
         'referer' : "https://book.naver.com/",
@@ -50,12 +52,14 @@ def weekBest(url):
                 book = result['items'][0]
                 imgurl = book['image']
                 urllink = book['link']
+                isbn = book['isbn'][-13:]
                 img_url[i] = imgurl
                 link[i] = urllink
+                isbns[i] = isbn
             else:
                 img_url[i]=' '
                 link[i]=' '
 
 
             i = i+1
-    return title, author, img_url, link
+    return title, author, img_url, link, isbns
