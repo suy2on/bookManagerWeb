@@ -29,6 +29,7 @@ class User(db.Model):
     userpw = db.Column(db.String(30), nullable=False)
     records = db.relationship('Record', backref='author')
     calendar = db.relationship('Calendar', backref='calendar')
+    wishlist = db.relationship('Wishlist', backref='wishlist')
 
 
 class Record(db.Model):
@@ -62,9 +63,17 @@ class Calendar(db.Model):
     time = db.Column(db.String(20), nullable=False)
     user_id = db.Column(db.String(20), db.ForeignKey('user.id'))
 
+class Wishlist(db.Model):
+    __table_name__ = 'wishlist'
 
+    id = db.Column(db.Integer, primary_key=True)
+    ISBN = db.Column(db.String(30), nullable=False)
+    title = db.Column(db.String(50), nullable=False)
+    img_url = db.Column(db.String, nullable=False)
+    writer = db.Column(db.String, nullable=False)
+    user_id = db.Column(db.String(20), db.ForeignKey('user.id'))
 
-
+db.create_all()
 
 ### 모델끝 ###
 
@@ -325,7 +334,17 @@ def looking():
     userid = session.get('userid', None)
     user = User.query.filter(User.userid == userid).first()
     print('user id: ', userid, 'user: ', user)
-    return render_template('looking.html', user=user)
+
+    userid = user.id
+    print(userid)
+    likelists = Wishlist.query.filter(Wishlist.user_id == userid).all()
+    isbns=[]
+    i=0
+    for likelist in likelists:
+        isbns.append(likelist.ISBN)
+        i = i+1
+    print(isbns) # isbns 는 사용user가 좋아요 누른 모든 책들의 isbn 목록들
+    return render_template('looking.html', user=user, isbns=isbns)
 
 # 베스트셀러 _ 클릭하면 장르별 책 나열하기
 @app.route("/genre", methods=["POST"])
@@ -337,6 +356,22 @@ def bestseller_genre():
     url = genre_dict[genre_receive]
     title, author, img_url, link, isbn = weekBest(url) # 책제목 딕셔너리 반환
     return jsonify({'result': 'success', 'title': title, 'author': author, 'img_url': img_url, 'link': link, 'isbn': isbn})
+
+# 좋아요 누르기 기능 구현
+@app.route("/heart", methods=["POST"])
+def clicklike():
+    userid = request.form.get("userid")
+    title = request.form.get("title")
+    author = request.form.get("author")
+    img_url = request.form.get("img_url")
+    isbn = request.form.get("isbn")
+    print(userid, title, author, img_url, isbn)
+
+    like = Wishlist(ISBN=isbn, title=title, img_url=img_url, writer=author, user_id=userid)
+    db.session.add(like)
+    db.session.commit()
+
+    return jsonify({'result': 'success'})
 
 
 
