@@ -355,21 +355,35 @@ def bestseller_genre():
     return jsonify({'result': 'success', 'title': title, 'author': author, 'img_url': img_url, 'link': link, 'isbn': isbn})
 
 # 좋아요 누르기 기능 구현
-@app.route("/heart", methods=["POST"])
+@app.route("/heart1", methods=["POST"])
 def clicklike():
     userid = request.form.get("userid")
     title = request.form.get("title")
     author = request.form.get("author")
     img_url = request.form.get("img_url")
     isbn = request.form.get("isbn")
-    print(userid, title, author, img_url, isbn)
+    print(userid, isbn)
 
     like = Wishlist(ISBN=isbn, title=title, img_url=img_url, writer=author, user_id=userid)
     db.session.add(like)
     db.session.commit()
-
     return jsonify({'result': 'success'})
 
+# 좋아요 취소 기능 구현
+@app.route("/heart2", methods=["POST"])
+def heart2():
+    userid = request.form.get("userid")
+    title = request.form.get("title")
+    author = request.form.get("author")
+    img_url = request.form.get("img_url")
+    isbn = request.form.get("isbn")
+    print(userid, isbn)
+
+    record = Wishlist.query.filter(Wishlist.user_id == userid).filter(Wishlist.ISBN == isbn).first()
+    print(record)
+    db.session.delete(record)
+    db.session.commit()
+    return jsonify({'result': 'success'})
 
 
 if __name__ == "__main__":
