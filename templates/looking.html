@@ -21,26 +21,47 @@
             crossorigin="anonymous"></script>
 
     <script type="text/javascript">
-        function heart(isbn, title, author, img_url) {
+        function heart(isbn, title, author, img_url, like) {
 
-             $.ajax({
-             type: "POST",
-             url: "/heart",
-             data: {
-                'userid': {{user.id}},
-                'isbn': isbn,
-                'title': title,
-                'author': author,
-                'img_url': img_url,
-             },
-             success: function(response) {
-                if(response['result'] == 'success') {
-                   alert("좋아요 완료");
-                   location.reload();
-                }
-                else {}
+             if(like == "far fa-heart") {
+                $.ajax({
+                    type: "POST",
+                    url: "/heart1",
+                    data: {
+                       'userid': {{user.id}},
+                       'isbn': isbn,
+                       'title': title,
+                       'author': author,
+                       'img_url': img_url,
+                    },
+                    success: function(response) {
+                       if(response['result'] == 'success') {
+                          alert("좋아요 완료");
+                          location.reload();
+                       }
+                       else {}
+                    }
+                })
              }
-             })
+             else {
+                $.ajax({
+                    type: "POST",
+                    url: "/heart2",
+                    data: {
+                       'userid': {{user.id}},
+                       'isbn': isbn,
+                    },
+                    success: function(response) {
+                       if(response['result'] == 'success') {
+                          alert("좋아요 취소 완료");
+                          location.reload();
+                       }
+                       else {}
+                    }
+                })
+             }
+
+
         }
 
         function option(clicked_genre) {
@@ -83,7 +104,7 @@
                               let temp_html = `<div class="card">
                                                <a href="${link}" target="_blank"><img class="card-img-top" src="${img_url}" alt=""></a>
                                                <div class="card-body">
-                                               <i class="${like}" onclick="heart('${isbn}', '${title}', '${author}', '${img_url}')"></i>
+                                               <i class="${like}" onclick="heart('${isbn}', '${title}', '${author}', '${img_url}', '${like}')"></i>
                                                <p class="card-text"><small class="text-muted">${i}위</small></p>
                                                <h5 class="card-title">${title}</h5>
                                                <p class="card-text"><small class="text-muted">${author}</small></p>

@@ -373,9 +373,6 @@ def clicklike():
 @app.route("/heart2", methods=["POST"])
 def heart2():
     userid = request.form.get("userid")
-    title = request.form.get("title")
-    author = request.form.get("author")
-    img_url = request.form.get("img_url")
     isbn = request.form.get("isbn")
     print(userid, isbn)
 
