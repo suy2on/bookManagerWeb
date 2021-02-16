@@ -333,13 +333,10 @@ def calendar():
 def looking():
     userid = session.get('userid', None)
     user = User.query.filter(User.userid == userid).first()
-
     likelists = user.wishlist # user의 wish객체들의 리스트 반
     isbns=[]
-
     for likelist in likelists:
         isbns.append(likelist.ISBN)
-
     print(isbns) # isbns 는 사용user가 좋아요 누른 모든 책들의 isbn 목록들
     return render_template('looking.html', user=user, isbnlist=isbns)
 
@@ -385,27 +382,35 @@ def heart2():
 @app.route('/search_page1', methods=['POST'])
 def search_page1():
     query= request.form.get('query')
+    print(query)
     session['query']= query # session에 검색어 저
     query = urllib.parse.quote(query)
     url = "https://openapi.naver.com/v1/search/book.json?query=" + query + "&display=10&start=1" # json 결과
     result = searchbook(url)
-    pages = result['total']/10 + 1 #페이지수
+    pages = int(result['total']/10) + 1 #페이지수
+    pagelist = []
+    i=0
+    for i in range(pages):
+        pagelist.append(i+1)
+        i=i+1
+    session['pagelist']=pagelist
     items = result['items']
+    print(items)
 
-
-    return render_template("search.html", result =items, pages = pages)
+    return render_template("search.html", items = items, pagelist = pagelist, query=query)
 
 @app.route('/search_page2', methods=['POST'])
 def search_page2():
-    page = int(request.form.get('page')) #현재페이지
+    page = int(request.form.get('pagenum')) #현재페이지
     start = str((page - 1) * 10 + 1)
     query = session.get('query', None)
     query = urllib.parse.quote(query)
     url = "https://openapi.naver.com/v1/search/book.json?query=" + query + "&display=10&start=" + start  # json 결과
     result = searchbook(url)
     items = result['items']
-
-    return jsonify({'result': 'success', 'items': items})
+    items = items[:10]
+    pagelist = session.get('pagelist', None)
+    return render_template("search.html", items=items, pagelist=pagelist)
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
