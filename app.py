@@ -382,6 +382,30 @@ def heart2():
     db.session.commit()
     return jsonify({'result': 'success'})
 
+@app.route('/search_page1', methods=['POST'])
+def search_page1():
+    query= request.form.get('query')
+    session['query']= query # session에 검색어 저
+    query = urllib.parse.quote(query)
+    url = "https://openapi.naver.com/v1/search/book.json?query=" + query + "&display=10&start=1" # json 결과
+    result = searchbook(url)
+    pages = result['total']/10 + 1 #페이지수
+    items = result['items']
+
+
+    return render_template("search.html", result =items, pages = pages)
+
+@app.route('/search_page2', methods=['POST'])
+def search_page2():
+    page = int(request.form.get('page')) #현재페이지
+    start = str((page - 1) * 10 + 1)
+    query = session.get('query', None)
+    query = urllib.parse.quote(query)
+    url = "https://openapi.naver.com/v1/search/book.json?query=" + query + "&display=10&start=" + start  # json 결과
+    result = searchbook(url)
+    items = result['items']
+
+    return jsonify({'result': 'success', 'items': items})
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
