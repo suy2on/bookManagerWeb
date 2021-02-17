@@ -421,5 +421,22 @@ def search_page2():
     pagelist = session.get('pagelist', None)
     return render_template("search.html", items=items, pagelist=pagelist, query = query1)
 
+
+#나의 서재 > 나의 위시북페이지로 이동
+@app.route("/wishbook", methods={'GET', 'POST'})
+def wishbook():
+    if request.method == 'GET':
+        user = session.get('userid', None)
+        _user = User.query.filter(User.userid == user).first()
+        print(_user)
+        user_idnum = _user.id
+        wishbooks = Wishlist.query.filter(Wishlist.user_id == user_idnum).all()
+        print(wishbooks)
+
+        isbns = isbnlist();
+        print(isbns)
+        return render_template('wishbook.html', user=user, items=wishbooks, isbns=isbns)
+
+
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
