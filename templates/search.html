@@ -21,62 +21,123 @@
             crossorigin="anonymous"></script>
 
 
-    <title>검색결과페이지 </title>
+    <title>검색결과페이지</title>
 
     <script type="text/javascript">
+        $(document).ready(function () {
+            bookList();
+        });
 
+        function heart(isbn, title, author, img_url, like) {
+
+             if(like == "far fa-heart") {
+                $('#'+ isbn).attr('class', "fas fa-heart")
+                $.ajax({
+                    type: "POST",
+                    url: "/heart1",
+                    data: {
+                       'isbn': isbn,
+                       'title': title,
+                       'author': author,
+                       'img_url': img_url,
+                    },
+                    success: function(response) {
+                       if(response['result'] == 'success') {
+                          alert("좋아요 완료");
+
+                       }
+                       else {}
+                    }
+                })
+             }
+             else {
+                 $('#'+isbn).attr('class', "fas fa-heart")
+                $.ajax({
+                    type: "POST",
+                    url: "/heart2",
+                    data: {
+                       'isbn': isbn,
+                    },
+                    success: function(response) {
+                       if(response['result'] == 'success') {
+                          alert("좋아요 취소 완료");
+                       }
+                       else {}
+                    }
+                })
+             }
+
+
+        }
+
+
+
+        function bookList(){
+            let arr = [];
+            {% for isbn in isbnlist %}
+            arr.push('{{isbn}}');
+            {% endfor %}
+            console.log(arr);
+
+            let title, author, url, img, like, isbn,tempHtml;
+            {% for item in items %}
+                url = "{{item.link}}";
+                title= "{{item.title}}";
+                author = "{{item.author}}";
+                img = "{{item.image}}";
+                isbn = "{{item.isbn}}"
+                isbn = isbn.slice(-13) //뒤에 13자리만 가져오기
+                title = title.replaceAll('&lt;b&gt;', '')
+                title = title.replaceAll('&lt;/b&gt;', '')
+                console.log(title)
+
+                 if(arr.includes(isbn)) {
+                     like = "fas fa-heart";
+                 } else {
+                     like = "far fa-heart";
+                 }
+
+
+                tempHtml= `<div class="card mb-3" style="max-width: 540px;">
+        <div class="row g-0">
+            <div class="col-md-4">
+                <img src="${img}" alt="...">
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h5 class="card-title">${title}</h5>
+                    <p class="card-text">${author }</p>
+                    <i id= "${isbn}" class="${like}" onclick="heart('${isbn}', '${title}', '${author}', '${img}', '${like}')"></i>
+                    <a href="${url}">자세히</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+`
+            $('.search-list').append(tempHtml);
+        {% endfor %}
+        }
     </script>
 </head>
 <body>
-<p> 검색결과입니다 </p>
+<h1>{{query}}  의 검색결과입니다 </h1>
+
 
 <div class="search-list">
-    <div class="card mb-3" style="max-width: 540px;">
-        <div class="row g-0">
-            <div class="col-md-4">
-                <img src="..." alt="...">
-            </div>
-            <div class="col-md-8">
-                <div class="card-body">
-                    <h5 class="card-title">Card title</h5>
-                    <p class="card-text">This is a wider card with supporting text below as a natural lead-in to
-                        additional content. This content is a little bit longer.</p>
-                    <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
-                </div>
-            </div>
-        </div>
 
-    </div>
-    <div class="card mb-3" style="max-width: 540px;">
-        <div class="row g-0">
-            <div class="col-md-4">
-                <img src="..." alt="...">
-            </div>
-            <div class="col-md-8">
-                <div class="card-body">
-                    <h5 class="card-title">Card title</h5>
-                    <p class="card-text">This is a wider card with supporting text below as a natural lead-in to
-                        additional content. This content is a little bit longer.</p>
-                    <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="card mb-3" style="max-width: 540px;">
-        <div class="row g-0">
-            <div class="col-md-4">
-                <img src="..." alt="...">
-            </div>
-            <div class="col-md-8">
-                <div class="card-body">
-                    <h5 class="card-title">Card title</h5>
-                    <p class="card-text">This is a wider card with supporting text below as a natural lead-in to
-                        additional content. This content is a little bit longer.</p>
-                    <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
-                </div>
-            </div>
-        </div>
+</div>
+
+
+<div class="btn-toolbar mb-3" role="toolbar" aria-label="Toolbar with button groups">
+    <div class="btn-group mr-2" role="group" aria-label="First group">
+        {% for page in pagelist %}
+        <form method="POST" action="/search_page2">
+            <button type="submit" class="btn btn-secondary" value="{{page}}" name="pagenum">{{page}}</button>
+        </form>
+        {% endfor %}
     </div>
 </div>
+
 </body>
 </html>
