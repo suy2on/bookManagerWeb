@@ -4,11 +4,36 @@
     <meta charset="UTF-8">
     <title>로그인 페이지</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+    <style>
+        .total{
+            width: 1000px;
+            height: 1024px;
+            background-position: center;
+            margin: auto;
+            background-image: url("../static/index.png");
 
+        }
+        .login{
+            position: relative;
+            width: 547px;
+            height: 293px;
+            top: 573px;
+
+            padding: 35px;
+            margin: auto;
+
+
+            /*border: 2px solid rgba(220, 214, 214, 0.6);*/
+            /*box-sizing: border-box;*/
+            /*border-radius: 10px;*/
+        }
+    </style>
     <script type="text/javascript">
         function login() {
-            let id = $('.id').val()
-            let pw = $('.pw').val()
+            let id = $('#id').val()
+            let pw = $('#pw').val()
 
             if (id == "" || pw == "") {
                 alert('아이디와 비밀번호를 입력해주세요');
@@ -39,11 +64,20 @@
     </script>
 </head>
 <body>
-<p>아이디</p>
-<input class="id" type="text">
-<p>비밀번호</p>
-<input class="pw" type="text">
-<button onclick="login()">로그인</button>
-<button onclick="join()">회원가입</button>
+<div class="total">
+
+    <div class="login">
+            <p>아이디</p>
+            <input class="input is-rounded" type="text" placeholder="id" id="id" style="width: 450px;">
+        <br>
+        <br>
+            <p>비밀번호</p>
+            <input class="input is-rounded" type="text" placeholder="password" id="pw" style="width: 450px"><br>
+        <br>
+        <br>
+            <button class="button is-outlined" onclick="login()" style="margin-left: 100px;">로그인</button>
+            <button class="button is-outlined" onclick="join()" style="margin-left: 100px;">회원가입</button>
+    </div>
+</div>
 </body>
 </html>

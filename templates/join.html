@@ -4,10 +4,29 @@
     <meta charset="utf-8"/>
     <title>회원가입페이지</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+    <style>
+        .total{
+            width: 1000px;
+            height: 1024px;
+            background-position: center;
+
+            background-image: url("../static/index.png");
+
+        }
+        .join{
+            position: relative;
+            width: 500px;
+            margin-left: 1100px;
+            padding-top: 300px;
+
+        }
+    </style>
     <script type="text/javascript">
 
         function check1() {
-            let id = $('.user_id').val();
+            let id = $('#user_id').val();
 
             $.ajax({
                 type: "POST",
@@ -26,8 +45,8 @@
         }
 
         function submit_form() {
-            let user_id = $('.user_id').val()
-            let user_pw = $('.user_pw').val()
+            let user_id = $('#user_id').val()
+            let user_pw = $('#user_pw').val()
             console.log(user_id, user_pw)
 
             $.ajax({
@@ -52,31 +71,37 @@
     </script>
 </head>
 <body>
-<h1>회원가입페이지 입니다</h1>
-<p>
-<td>아이디</td>
-<td><input type="text" class="user_id"></td>
-
-<button onclick="check1()">아이디중복확인</button>
-</p>
-
-<p>
-<td>비밀번호</td>
-<td><input type="text" class="user_pw"/></td>
-</p>
-<p>
-<td>선호취향(중복선택가능)</td>
-<td>1 <input type="checkbox" name="1" value="computer"/></td>
-<td>2 <input type="checkbox" name="2" value="computer"/></td>
-<td>3 <input type="checkbox" name="3" value="computer"/></td>
-<td>4 <input type="checkbox" name="4" value="computer"/></td>
-</p>
-<p>
-<td>
-    <button onclick="submit_form()">회원가입완료</button>
-</td>
-</p>
-
+<div class="total">
+    <div class="join">
+        <h1 style="font-size: xx-large">join</h1>
+        <br>
+        <p>아이디</p>
+        <input class="input is-rounded" type="text" placeholder="id" id="user_id" style="width: 450px;">
+        <br>
+        <div style="margin-top: 15px">
+            <button class="button is-outlined" onclick="check1()">아이디중복검사</button>
+        </div>
+        <br>
+        <p>비밀번호</p>
+        <input class="input is-rounded" type="text" placeholder="password" id="user_pw" style="width: 450px"><br>
+        <br>
+        <div class="select">
+          <select>
+            <option>--선택하세요--</option>
+            <option>아동</option>
+            <option>10대</option>
+            <option>20대</option>
+            <option>30대</option>
+            <option>40대</option>
+            <option>50대</option>
+            <option>60대이</option>
+          </select>
+        </div>
+         <div style="margin-top: 50px">
+            <button class="button is-outlined" onclick="submit_form()" style="margin-left: 180px;">회원가입</button>
+         </div>
+    </div>
+</div>
 
 </body>
 </html>
