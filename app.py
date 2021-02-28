@@ -375,16 +375,10 @@ def looking2():
             if finalbook is not None: # 책(한권)이 북db에 있는 경우
                 book_title = (finalbook['title'].values)[0]
                 book_index = (finalbook['title'].index.values)[0]
-                book_count = int(((bookdbbook['title'].value_counts()).values)[0])
-                print(book_count)
                 booklist = []
-                if book_count == 1: # 책(한권)이 한권인 경우 > ok
-                    print("한권입니다")
-                    similar_books = find_sim_book(final_df, genre_sim_sorted_ind, book_title, 5)
-                    print(similar_books[['title', 'genre','age']])
-                    #booklist.append(similar_books)
-                else: # 책(한권)이 중복인 경우 >> 이거 안따져도 될것같애
-                    print("여러권입니다")
+                similar_books = find_sim_book(final_df, genre_sim_sorted_ind, book_title, 5)
+                print(similar_books[['title', 'genre','age']])
+                #booklist.append(similar_books)
             else: # 책(한권)이  북db에 없는 경우 > 구글 api로 final.csv에 책 추가하기
                 print("!")
         return jsonify({'result': 'yesbook'})
