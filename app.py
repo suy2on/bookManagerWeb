@@ -5,6 +5,9 @@ import urllib.request
 from urllib.parse import urlencode
 import datetime
 from bestSeller import *
+from contentsFilter import *
+import pandas as pd
+import numpy as np
 
 # 네이버 api사용을 위한 정보
 client_id = "slXTgcZ7T9bocjBAKSFq"
@@ -349,6 +352,40 @@ def looking():
     print(isbns) # isbns 는 사용user가 좋아요 누른 모든 책들의 isbn 목록들
     return render_template('looking.html', user=user, isbnlist=isbns)
 
+# 책 추천
+@app.route("/looking2", methods=["GET"])
+def looking2():
+    userid = session.get('userid', None)
+    user = User.query.filter(User.userid == userid).first()
+    isbns = isbnlist();
+    print(isbns)
+    print(type(isbns))
+    if isbns == []: # 위시북이 한권도 없는 경우
+        return jsonify({'result': 'nobook'})
+    else: # 위시북이 하나라도 있는 경우
+        ## 책이 있나 없나 확인 > final.csv에서 확인
+        ### 있다 > 책 title이 한개인지 중복인지 확인 > bookdb.csv에서 확인
+        #### 책 title이 한개임 > ok
+        #### 책 title이 중복임 > bookdb.csv에서 중복책들의 대출권수 합해서 final.csv의 대출권수를 대신하기
+        ### 없다 > 구글api 로 final.csv에 책 추가하기 > ok
+        for isbn in isbns:
+            final_df = pd.read_csv('final.csv')
+            finalbook = final_df[final_df['isbn13'] == int(isbn)]
+            bookdb_df = pd.read_csv('bookdb.csv')
+            bookdb_df = bookdb_df.drop_duplicates(['title'], keep = 'first')
+            bookdbbook = bookdb_df[bookdb_df['isbn13'] == int(isbn)]
+            if finalbook is not None: # 책(한권)이 북db에 있는 경우
+                book_title = (finalbook['title'].values)[0]
+                book_index = (finalbook['title'].index.values)[0]
+                booklist = []
+                similar_books = find_sim_book(final_df, genre_sim_sorted_ind, book_title, 5)
+                print(similar_books[['title', 'genre','age']])
+                #booklist.append(similar_books)
+            else: # 책(한권)이  북db에 없는 경우 > 구글 api로 final.csv에 책 추가하기
+                print("!")
+        return jsonify({'result': 'yesbook'})
+
+
 # 베스트셀러 _ 클릭하면 장르별 책 나열하기
 @app.route("/genre", methods=["POST"])
 def bestseller_genre():
@@ -438,6 +475,12 @@ def wishbook():
         isbns = isbnlist();
         print(isbns)
         return render_template('wishbook.html', user=user, items=wishbooks, isbns=isbns)
+
+
+##########책 추천##########
+#위시북 리스트에 위시북이 있는지 확인
+
+
 
 
 if __name__ == "__main__":
