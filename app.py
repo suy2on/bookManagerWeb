@@ -13,7 +13,7 @@ client_secret = "n4tbFhbriV"
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'secretkey'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bookManager.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bookweb.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -25,6 +25,7 @@ class User(db.Model):
     __table_name__ = 'user'
 
     id = db.Column(db.Integer, primary_key=True)
+    age = db.Column(db.String(15), nullable=False)
     userid = db.Column(db.String(20), nullable=False)
     userpw = db.Column(db.String(30), nullable=False)
     records = db.relationship('Record', backref='author')
@@ -200,8 +201,9 @@ def check1():
 def form_submit():
     id_receive = request.form['id_give']
     pw_receive = request.form['pw_give']
-    pw_receive = generate_password_hash(pw_receive)
-    user = User(userid=id_receive, userpw=pw_receive)
+    age_receive = request.form['age_give']
+    pw_receive = generate_password_hash(pw_receive) #암호화
+    user = User(userid=id_receive, userpw=pw_receive, age= age_receive)
     db.session.add(user)
     db.session.commit()
     return jsonify({'result': 'success', 'msg': '회원가입 성공'})

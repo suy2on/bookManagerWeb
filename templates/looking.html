@@ -19,7 +19,12 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
             integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
             crossorigin="anonymous"></script>
-
+    <style>
+        .card-group,.recommand{
+            height: 580px;
+            width: 100%;
+        }
+    </style>
     <script type="text/javascript">
         function heart(isbn, title, author, img_url, like) {
 
@@ -121,7 +126,9 @@
                     })
         }
 
+        function recommand(){
 
+        }
 
 
 
@@ -155,10 +162,15 @@
 <button class="btn btn-outline-primary" id="language" type="button" onclick="option(this.id)">국어와 외국어</button>
 <button class="btn btn-outline-secondary" id="history" type="button" onclick="option(this.id)">역사와 문화</button>
 
-
+<br>
 <div class="card-group" id="cards">
 </div>
-
+<br>
+<br>
 <h1>{{user.userid }}님 취향의 책 추천</h1>
+<div class="recommand">
+
+</div>
+<button onclick="recommand()">추천받기</button>
 </body>
 </html>

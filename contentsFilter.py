@@ -7,6 +7,7 @@ import warnings; warnings.filterwarnings('ignore')
 books = pd.read_csv('final.csv')
 books[:1]
 books_df = books.drop(['Unnamed: 0'],axis=1) # 필요없는 컬럼 제거
+print(books_df['age'].value_counts())
 
 
 #장르들 string으로 변화
@@ -38,6 +39,6 @@ def find_sim_book(df, sorted_ind, title_name, top_n=5):
 
     return df.iloc[similar_indexes]
 
-similar_books = find_sim_book(books_df, genre_sim_sorted_ind, '코로나 투자 전쟁 =전 세계 금융 역사 이래 최대의 유동성 /Money war ', 5)
+similar_books = find_sim_book(books_df, genre_sim_sorted_ind, '코로나 투자 전쟁 =전 세계 금융 역사 이래 최대의 유동성 /Money war', 5)
 print(similar_books[['title', 'genre','age']])
 
