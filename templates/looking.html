@@ -130,6 +130,23 @@
 
         }
 
+          function wishbook() {
+            $.ajax({
+                    type: "GET",
+                    url: "/looking2",
+                    data: {},
+                    success: function(response) {
+                       if(response['result'] == 'nobook') {
+                          alert("위시북을 설정해주세요!");
+                       }
+                       else {
+                          alert(response['result']);
+                       }
+                    }
+            })
+
+        }
+
 
 
     </script>
