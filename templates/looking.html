@@ -129,6 +129,7 @@
 
 
           function recommand() {
+
             $.ajax({
                     type: "GET",
                     url: "/looking2",
@@ -138,7 +139,27 @@
                           alert("위시북을 설정해주세요!");
                        }
                        else {
-                          alert(response['result']);
+                           $('#recommands').empty()
+                          console.log(response['result'])
+                           let books = response['result']
+
+                           for ( let i=0; i<response['result'].length; i++){
+                                let title = books[i]['title'];
+                                let author = books[i]['author'];
+                                let desc = books[i]['description']
+                                let link = books[i]['link'];
+
+
+                               let temp_html = `<div class="card">
+                                                  <div class="card-body">
+                                                    <h5 class="card-title">${title}</h5>
+                                                    <p class="card-text">${author}</p>
+                                                    <p class="card-text"> ${desc}</p>
+                                                    <a href="${link}" class="btn btn-primary" target="_blank">책보러가기</a>
+                                                  </div>`
+
+                                $('#recommands').append(temp_html);
+                           }
                        }
                     }
             })
@@ -183,7 +204,7 @@
 <br>
 <br>
 <h1>{{user.userid }}님 취향의 책 추천</h1>
-<div class="recommand">
+<div class="card-deck" id="recommands">
 
 </div>
 <button onclick="recommand()">추천받기</button>

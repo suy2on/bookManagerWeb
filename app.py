@@ -6,10 +6,10 @@ from urllib.parse import urlencode
 import datetime
 from bestSeller import *
 from contentsFilter import *
+from recommand import *
 import pandas as pd
-import numpy as np
 import requests
-import os
+
 
 # 네이버 api사용을 위한 정보
 client_id = "slXTgcZ7T9bocjBAKSFq"
@@ -361,8 +361,6 @@ def looking2():
     userid = session.get('userid', None)
     user = User.query.filter(User.userid == userid).first()
     isbns = isbnlist();
-    print(isbns)
-    print(type(isbns))
     if isbns == []: # 위시북이 한권도 없는 경우
         return jsonify({'result': 'nobook'})
     else: # 위시북이 하나라도 있는 경우
@@ -373,8 +371,6 @@ def looking2():
             final_df = pd.read_csv('final.csv')
             finalbook = final_df[final_df['isbn13'] == int(isbn)]
 
-            bookdb_df = pd.read_csv('bookdb.csv')
-            bookdb_df = bookdb_df.drop_duplicates(['title'], keep = 'first')
             print(finalbook)
             try: (finalbook.values.tolist())[0]
             except: # 책(한권)이 북 db에 없는 경우 > 구글 api로 final.csv에 책 추가 (isbn을 이용해 책 검색)
@@ -392,25 +388,41 @@ def looking2():
                     new_book['isbn13'] = [isbn]
                     new_book['title'] = [book['items'][0]['volumeInfo']['title']]
                     #
-                    print(new_book)
                     new_df = pd.DataFrame(new_book) # dict -> df
                     ##final.csv 파일에 새로운 책 추가하기
 
-                    final_df = final_df.append(new_df,  ignore_index=True)
-                    print(final_df)
+                    final_df = final_df.append(new_df,  ignore_index=True) # 추가완료
                     ##
-                    genre_sim_sorted_ind = contentsFilter(final_df)
+                    genre_sim_sorted_ind = contentsFilter(final_df) #콘텐츠기반필터링
                     similar_books = find_sim_book(final_df, genre_sim_sorted_ind, new_book['title'], 5)
                     recommand_df = recommand_df.append(similar_books)
                     print(similar_books)
             else: # 책(한권)이 북 db에 있는 경우
                 print("책 있음")
-                genre_sim_sorted_ind = contentsFilter(final_df)
+                genre_sim_sorted_ind = contentsFilter(final_df) # 콘텐츠기반필터링
                 book_title = (finalbook['title'].values)[0]
                 similar_books = find_sim_book(final_df, genre_sim_sorted_ind, book_title, 5)
                 recommand_df = recommand_df.append(similar_books)
-    print(recommand_df)
-    return jsonify({'result': '위시북이 있습니다!'})
+    bookdb = pd.read_csv('bookdb.csv')
+    recommand_df = loan_cnt(recommand_df, bookdb) # 대출권수 갱신
+    result = recommand( recommand_df, user.age) # 나이로 추천 한번더 거르기
+    print(result)
+    title_list = result['title'].tolist()
+    if len(title_list) > 5:
+        title_list = title_list[:5]
+    ### 네이버 검색 api 책 정보 찾기 ###
+    result = []
+    for title in title_list:
+        title = urllib.parse.quote(title)
+        url = "https://openapi.naver.com/v1/search/book_adv.json?d_titl=" + title # json 결과
+        books = searchbook(url)
+        # 찾으면
+        if (books != 'error'):
+            result.append(books['items'][0]) ##addBook함수실행
+        else:
+            print('검색결과 오류')
+    print(result)
+    return jsonify({'result': result, 'msg': '추천완료' }) # 5상위 5권만
 
 
 # 베스트셀러 _ 클릭하면 장르별 책 나열하기
