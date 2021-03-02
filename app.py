@@ -357,8 +357,7 @@ def looking():
 # 책 추천
 @app.route("/looking2", methods=["GET"])
 def looking2():
-    booklist = []
-    i=0
+    recommand_df= pd.DataFrame(columns = ['title', 'isbn13', 'loan_cnt', 'author', 'publisher', 'sex','age','genre'])
     userid = session.get('userid', None)
     user = User.query.filter(User.userid == userid).first()
     isbns = isbnlist();
@@ -376,7 +375,7 @@ def looking2():
 
             bookdb_df = pd.read_csv('bookdb.csv')
             bookdb_df = bookdb_df.drop_duplicates(['title'], keep = 'first')
-            bookdbbook = bookdb_df[bookdb_df['isbn13'] == int(isbn)]
+            print(finalbook)
             try: (finalbook.values.tolist())[0]
             except: # 책(한권)이 북 db에 없는 경우 > 구글 api로 final.csv에 책 추가 (isbn을 이용해 책 검색)
                 print("책 없음")
@@ -388,31 +387,29 @@ def looking2():
                     print("no genre")
                 else:
                     print("yes genre")
-                    book_title=['book_title']
-                    book_isbn13=['book_isbn13']
-                    book_genre=['book_genre']
-                    book_genre[0] = book['items'][0]['volumeInfo']['categories'][0]
-                    book_isbn13[0] = isbn
-                    book_title[0] = book['items'][0]['volumeInfo']['title']
+                    new_book = {}
+                    new_book['genre'] = [book['items'][0]['volumeInfo']['categories'][0]]
+                    new_book['isbn13'] = [isbn]
+                    new_book['title'] = [book['items'][0]['volumeInfo']['title']]
                     #
-                    print(book_title, book_isbn13, book_genre)
-                    ## final.csv 파일에 새로운 책 추가하기
-                 
+                    print(new_book)
+                    new_df = pd.DataFrame(new_book) # dict -> df
+                    ##final.csv 파일에 새로운 책 추가하기
+
+                    final_df = final_df.append(new_df,  ignore_index=True)
+                    print(final_df)
                     ##
-                    similar_books = find_sim_book(final_df, genre_sim_sorted_ind, book_title[0], 5)
-                    similar_books = similar_books.to_dict('list')
-                    booklist.append(similar_books)
+                    genre_sim_sorted_ind = contentsFilter(final_df)
+                    similar_books = find_sim_book(final_df, genre_sim_sorted_ind, new_book['title'], 5)
+                    recommand_df = recommand_df.append(similar_books)
                     print(similar_books)
-                    i = i + 1
             else: # 책(한권)이 북 db에 있는 경우
                 print("책 있음")
+                genre_sim_sorted_ind = contentsFilter(final_df)
                 book_title = (finalbook['title'].values)[0]
-                book_index = (finalbook['title'].index.values)[0]
                 similar_books = find_sim_book(final_df, genre_sim_sorted_ind, book_title, 5)
-                similar_books = similar_books.to_dict('list')
-                booklist.append(similar_books)
-                i = i+1
-    print(booklist)
+                recommand_df = recommand_df.append(similar_books)
+    print(recommand_df)
     return jsonify({'result': '위시북이 있습니다!'})
 
 

@@ -1,10 +1,5 @@
 import pandas as pd
 
-test_df = pd.read_csv('final.csv')
-bookdb = pd.read_csv('bookdb.csv')
-test_df= test_df[:5]
-
-
 
 
 def loan_cnt(df, bookdb):
@@ -20,7 +15,7 @@ def loan_cnt(df, bookdb):
 
     return pd.DataFrame(df_dict) # 다시 데이터프레임으로 만들어서 반환
 
-print(loan_cnt(test_df,bookdb))
+
 
 
 def recommand( df, age):
