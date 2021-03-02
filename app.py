@@ -8,6 +8,8 @@ from bestSeller import *
 from contentsFilter import *
 import pandas as pd
 import numpy as np
+import requests
+import os
 
 # 네이버 api사용을 위한 정보
 client_id = "slXTgcZ7T9bocjBAKSFq"
@@ -16,7 +18,7 @@ client_secret = "n4tbFhbriV"
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'secretkey'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bookweb.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bookManager.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -28,7 +30,6 @@ class User(db.Model):
     __table_name__ = 'user'
 
     id = db.Column(db.Integer, primary_key=True)
-    age = db.Column(db.String(15), nullable=False)
     userid = db.Column(db.String(20), nullable=False)
     userpw = db.Column(db.String(30), nullable=False)
     records = db.relationship('Record', backref='author')
@@ -204,9 +205,8 @@ def check1():
 def form_submit():
     id_receive = request.form['id_give']
     pw_receive = request.form['pw_give']
-    age_receive = request.form['age_give']
-    pw_receive = generate_password_hash(pw_receive) #암호화
-    user = User(userid=id_receive, userpw=pw_receive, age= age_receive)
+    pw_receive = generate_password_hash(pw_receive)
+    user = User(userid=id_receive, userpw=pw_receive)
     db.session.add(user)
     db.session.commit()
     return jsonify({'result': 'success', 'msg': '회원가입 성공'})
@@ -355,6 +355,8 @@ def looking():
 # 책 추천
 @app.route("/looking2", methods=["GET"])
 def looking2():
+    booklist = []
+    i=0
     userid = session.get('userid', None)
     user = User.query.filter(User.userid == userid).first()
     isbns = isbnlist();
@@ -364,26 +366,52 @@ def looking2():
         return jsonify({'result': 'nobook'})
     else: # 위시북이 하나라도 있는 경우
         ## 책이 있나 없나 확인 > final.csv에서 확인
-        ### 있다 > 책 title이 한개인지 중복인지 확인 > bookdb.csv에서 확인
-        #### 책 title이 한개임 > ok
-        #### 책 title이 중복임 > bookdb.csv에서 중복책들의 대출권수 합해서 final.csv의 대출권수를 대신하기
+        ### 있다 > ok
         ### 없다 > 구글api 로 final.csv에 책 추가하기 > ok
         for isbn in isbns:
             final_df = pd.read_csv('final.csv')
             finalbook = final_df[final_df['isbn13'] == int(isbn)]
+
             bookdb_df = pd.read_csv('bookdb.csv')
             bookdb_df = bookdb_df.drop_duplicates(['title'], keep = 'first')
             bookdbbook = bookdb_df[bookdb_df['isbn13'] == int(isbn)]
-            if finalbook is not None: # 책(한권)이 북db에 있는 경우
+            try: (finalbook.values.tolist())[0]
+            except: # 책(한권)이 북 db에 없는 경우 > 구글 api로 final.csv에 책 추가 (isbn을 이용해 책 검색)
+                print("책 없음")
+                # 구글 api 에 요청하기
+                response_data = requests.get("https://www.googleapis.com/books/v1/volumes?q=" + isbn)
+                book = response_data.json()
+                try: book['items'][0]['volumeInfo']['categories'][0]
+                except: # 장르가 없는 경우
+                    print("no genre")
+                else:
+                    print("yes genre")
+                    book_title=['book_title']
+                    book_isbn13=['book_isbn13']
+                    book_genre=['book_genre']
+                    book_genre[0] = book['items'][0]['volumeInfo']['categories'][0]
+                    book_isbn13[0] = isbn
+                    book_title[0] = book['items'][0]['volumeInfo']['title']
+                    #
+                    print(book_title, book_isbn13, book_genre)
+                    ## final.csv 파일에 새로운 책 추가하기
+                 
+                    ##
+                    similar_books = find_sim_book(final_df, genre_sim_sorted_ind, book_title[0], 5)
+                    similar_books = similar_books.to_dict('list')
+                    booklist.append(similar_books)
+                    print(similar_books)
+                    i = i + 1
+            else: # 책(한권)이 북 db에 있는 경우
+                print("책 있음")
                 book_title = (finalbook['title'].values)[0]
                 book_index = (finalbook['title'].index.values)[0]
-                booklist = []
                 similar_books = find_sim_book(final_df, genre_sim_sorted_ind, book_title, 5)
-                print(similar_books[['title', 'genre','age']])
-                #booklist.append(similar_books)
-            else: # 책(한권)이  북db에 없는 경우 > 구글 api로 final.csv에 책 추가하기
-                print("!")
-        return jsonify({'result': 'yesbook'})
+                similar_books = similar_books.to_dict('list')
+                booklist.append(similar_books)
+                i = i+1
+    print(booklist)
+    return jsonify({'result': '위시북이 있습니다!'})
 
 
 # 베스트셀러 _ 클릭하면 장르별 책 나열하기
