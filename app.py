@@ -369,7 +369,8 @@ def looking2():
         ### 없다 > 구글api 로 final.csv에 책 추가하기 > ok
         for isbn in isbns:
             final_df = pd.read_csv('final.csv')
-            finalbook = final_df[final_df['isbn13'] == int(isbn)]
+            print(final_df.info())
+            finalbook = final_df[final_df['isbn13'] == isbn]
 
             print(finalbook)
             try: (finalbook.values.tolist())[0]
@@ -396,29 +397,30 @@ def looking2():
                     genre_sim_sorted_ind = contentsFilter(final_df) #콘텐츠기반필터링
                     similar_books = find_sim_book(final_df, genre_sim_sorted_ind, new_book['title'], 5)
                     recommand_df = recommand_df.append(similar_books)
-                    print(similar_books)
+                    print('similar_books' ,similar_books)
+                    print(recommand_df)
             else: # 책(한권)이 북 db에 있는 경우
                 print("책 있음")
                 genre_sim_sorted_ind = contentsFilter(final_df) # 콘텐츠기반필터링
-                book_title = (finalbook['title'].values)[0]
+                book_title = (finalbook['title'].values)
                 similar_books = find_sim_book(final_df, genre_sim_sorted_ind, book_title, 5)
                 recommand_df = recommand_df.append(similar_books)
     bookdb = pd.read_csv('bookdb.csv')
     recommand_df = loan_cnt(recommand_df, bookdb) # 대출권수 갱신
     result = recommand( recommand_df, user.age) # 나이로 추천 한번더 거르기
-    print(result)
-    title_list = result['title'].tolist()
-    if len(title_list) > 5:
-        title_list = title_list[:5]
+    isbn13_list = result['isbn13'].tolist()
+    if len(isbn13_list) > 5:
+        isbn13_list = isbn13_list[:5]
     ### 네이버 검색 api 책 정보 찾기 ###
     result = []
-    for title in title_list:
-        title = urllib.parse.quote(title)
-        url = "https://openapi.naver.com/v1/search/book_adv.json?d_titl=" + title # json 결과
+    for isbn in isbn13_list:
+        isbn = urllib.parse.quote(isbn)
+        url = "https://openapi.naver.com/v1/search/book_adv.json?d_isbn=" + isbn# json 결과
         books = searchbook(url)
         # 찾으면
         if (books != 'error'):
-            result.append(books['items'][0]) ##addBook함수실행
+            if books['items'] != []:
+                result.append(books['items'][0]) ##addBook함수실행
         else:
             print('검색결과 오류')
     print(result)

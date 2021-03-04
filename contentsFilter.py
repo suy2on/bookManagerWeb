@@ -26,7 +26,6 @@ def contentsFilter(db):
 
     #정렬
     genre_sim_sorted_ind = genre_sim.argsort()[:, ::-1]
-    print(genre_sim_sorted_ind[:2])
 
     return genre_sim_sorted_ind
 
@@ -35,8 +34,7 @@ def find_sim_book(df, sorted_ind, title_name, top_n=5):
     title_book = df[df['title'] == title_name[0]]
 
     title_index = title_book.index.values
-    print('hear')
-    similar_indexes = sorted_ind[title_index, :top_n]
+    similar_indexes = sorted_ind[title_index, 1:top_n+1]
 
     print(similar_indexes)
     similar_indexes = similar_indexes.reshape(-1)
